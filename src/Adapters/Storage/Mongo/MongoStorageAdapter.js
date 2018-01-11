@@ -434,7 +434,7 @@ export class MongoStorageAdapter implements StorageAdapter {
   }
 
   // Executes a find. Accepts: className, query in Parse format, and { skip, limit, sort }.
-  find(className: string, schema: SchemaType, query: QueryType, { skip, limit, sort, keys, readPreference }: QueryOptions): Promise<any> {
+  find(className: string, schema: SchemaType, query: QueryType, { skip, limit, sort, keys, readPreference, collation }: QueryOptions): Promise<any> {
     schema = convertParseSchemaToMongoSchema(schema);
     const mongoWhere = transformWhere(className, query, schema);
     const mongoSort = _.mapKeys(sort, (value, fieldName) => transformKey(className, fieldName, schema));
@@ -453,6 +453,7 @@ export class MongoStorageAdapter implements StorageAdapter {
         keys: mongoKeys,
         maxTimeMS: this._maxTimeMS,
         readPreference,
+        collation,
       }))
       .then(objects => objects.map(object => mongoObjectToParseObject(className, object, schema)))
   }

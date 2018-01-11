@@ -846,7 +846,8 @@ class DatabaseController {
     op,
     distinct,
     pipeline,
-    readPreference
+    readPreference,
+    collation,
   }: any = {}): Promise<any> {
     const isMaster = acl === undefined;
     const aclGroup = acl || [];
@@ -882,7 +883,7 @@ class DatabaseController {
               sort.updatedAt = sort._updated_at;
               delete sort._updated_at;
             }
-            const queryOptions = { skip, limit, sort, keys, readPreference };
+            const queryOptions = { skip, limit, sort, keys, readPreference, collation };
             Object.keys(sort).forEach(fieldName => {
               if (fieldName.match(/^authData\.([a-zA-Z0-9_]+)\.id$/)) {
                 throw new Parse.Error(Parse.Error.INVALID_KEY_NAME, `Cannot sort by ${fieldName}`);

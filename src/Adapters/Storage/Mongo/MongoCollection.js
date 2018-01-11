@@ -13,13 +13,13 @@ export default class MongoCollection {
   // none, then build the geoindex.
   // This could be improved a lot but it's not clear if that's a good
   // idea. Or even if this behavior is a good idea.
-  find(query, { skip, limit, sort, keys, maxTimeMS, readPreference } = {}) {
+  find(query, { skip, limit, sort, keys, maxTimeMS, readPreference, collation } = {}) {
     // Support for Full Text Search - $text
     if(keys && keys.$score) {
       delete keys.$score;
       keys.score = {$meta: 'textScore'};
     }
-    return this._rawFind(query, { skip, limit, sort, keys, maxTimeMS, readPreference })
+    return this._rawFind(query, { skip, limit, sort, keys, maxTimeMS, readPreference, collation })
       .catch(error => {
         // Check for "no geoindex" error
         if (error.code != 17007 && !error.message.match(/unable to find index for .geoNear/)) {
@@ -39,9 +39,13 @@ export default class MongoCollection {
       });
   }
 
-  _rawFind(query, { skip, limit, sort, keys, maxTimeMS, readPreference } = {}) {
+  _rawFind(query, { skip, limit, sort, keys, maxTimeMS, readPreference, collation } = {}) {
     let findOperation = this._mongoCollection
-      .find(query, { skip, limit, sort, readPreference })
+      .find(query, { skip, limit, sort, readPreference });
+    
+    if (collation) {
+      findOperation.collation(collation);
+    }
 
     if (keys) {
       findOperation = findOperation.project(keys);
